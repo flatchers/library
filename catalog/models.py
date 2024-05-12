@@ -7,14 +7,14 @@ from library import settings
 
 
 class Book(models.Model):
-    class Cover(models.TextChoices):
+    class CoverChoices(models.TextChoices):
         HARD = "HARD"
         SOFT = "SOFT"
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
-    cover = models.CharField(max_length=255, choices=Cover.choices)
+    cover = models.CharField(max_length=255, choices=CoverChoices.choices)
     inventory = models.PositiveIntegerField()
-    daily_fee = models.DecimalField(max_digits=None, decimal_places=2)
+    daily_fee = models.DecimalField(max_digits=10, decimal_places=2)
 
 
 class Borrowing(models.Model):
@@ -27,16 +27,16 @@ class Borrowing(models.Model):
 
 class Payment(models.Model):
 
-    class Status(models.TextField):
+    class StatusChoices(models.TextChoices):
         PENDING = "PENDING"
         PAID = "PAID"
 
-    class Type(models.TextField):
+    class TypeChoices(models.TextChoices):
         PAYMENT = "PAYMENT"
         FINE = "FINE"
-    status = models.CharField(max_length=255, choices=Status.choices)
-    type = models.CharField(max_length=255, choices=Type.choices)
-    borrowing_id = models.ForeignKey(Borrowing, on_delete=models.CASCADE)
+    status = models.CharField(max_length=255, choices=StatusChoices.choices)
+    type = models.CharField(max_length=255, choices=TypeChoices.choices)
+    borrowing_id = models.ForeignKey(Borrowing, related_name="payments", on_delete=models.CASCADE)
     session_url = models.URLField()
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     money_to_pay = models.ManyToManyField(Borrowing)
