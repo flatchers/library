@@ -10,5 +10,9 @@ class BookAdmin(admin.ModelAdmin):
     search_fields = ["title", ]
 
 
-admin.site.register(Borrowing)
+@admin.register(Borrowing)
+class BorrowingAdmin(admin.ModelAdmin):
+    list_display = ["borrow_date", "expected_return", "actual_return"]
+
+
 admin.site.register(Payment)
