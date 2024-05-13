@@ -14,29 +14,32 @@ class Book(models.Model):
     author = models.CharField(max_length=255)
     cover = models.CharField(max_length=255, choices=Cover.choices)
     inventory = models.PositiveIntegerField()
-    daily_fee = models.DecimalField(max_digits=None, decimal_places=2)
+    daily_fee = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.title}"
 
 
 class Borrowing(models.Model):
     borrow_date = models.DateField(auto_now=True)
     expected_return = models.DateField()
-    actual_return = models.DateField()
+    actual_return = models.DateField(blank=True, null=True)
     book_id = models.ManyToManyField(Book)
     user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
 
 class Payment(models.Model):
 
-    class Status(models.TextField):
+    class Status(models.TextChoices):
         PENDING = "PENDING"
         PAID = "PAID"
 
-    class Type(models.TextField):
+    class Type(models.TextChoices):
         PAYMENT = "PAYMENT"
         FINE = "FINE"
     status = models.CharField(max_length=255, choices=Status.choices)
     type = models.CharField(max_length=255, choices=Type.choices)
-    borrowing_id = models.ForeignKey(Borrowing, on_delete=models.CASCADE)
+    borrowing_id = models.ForeignKey(Borrowing, related_name="types", on_delete=models.CASCADE)
     session_url = models.URLField()
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     money_to_pay = models.ManyToManyField(Borrowing)
