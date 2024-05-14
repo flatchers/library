@@ -27,9 +27,6 @@ class Borrowing(models.Model):
     book_id = models.ManyToManyField(Book)
     user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.borrow_date
-
 
 class Payment(models.Model):
 
