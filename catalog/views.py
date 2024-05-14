@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 
 from catalog.models import Book, Borrowing, Payment
 from catalog.permissions import IsAdminOrReadOnly
-from catalog.serializers import BookSerializer, BorrowingSerializer, PaymentSerializer
+from catalog.serializers import BookSerializer, BorrowingSerializer, PaymentSerializer, BorrowingListSerializer
 
 
 class BookViewSet(viewsets.ModelViewSet):
@@ -15,6 +15,12 @@ class BookViewSet(viewsets.ModelViewSet):
 class BorrowingViewSet(viewsets.ModelViewSet):
     queryset = Borrowing.objects.all()
     serializer_class = BorrowingSerializer
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return BorrowingListSerializer
+        else:
+            return BorrowingSerializer
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
