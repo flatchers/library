@@ -18,6 +18,6 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment
+    queryset = Payment.objects.all()
     serializer_class = PaymentSerializer
 
