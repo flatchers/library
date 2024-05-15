@@ -25,7 +25,8 @@ class Borrowing(models.Model):
     expected_return = models.DateField()
     actual_return = models.DateField(blank=True, null=True)
     book_id = models.ManyToManyField(Book)
-    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="borrowings", on_delete=models.CASCADE)
+
 
 
 class Payment(models.Model):
