@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from catalog.models import Book, Borrowing, Payment
+from user.models import User
 
 
 @admin.register(Book)
@@ -18,3 +19,6 @@ class BorrowingAdmin(admin.ModelAdmin):
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ["status", "type", "session_url", "session_id", ]
+
+
+admin.site.register(User)
