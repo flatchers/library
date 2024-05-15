@@ -7,12 +7,12 @@ from library import settings
 
 
 class Book(models.Model):
-    class Cover(models.TextChoices):
+    class CoverChoices(models.TextChoices):
         HARD = "HARD"
         SOFT = "SOFT"
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
-    cover = models.CharField(max_length=255, choices=Cover.choices)
+    cover = models.CharField(max_length=255, choices=CoverChoices.choices)
     inventory = models.PositiveIntegerField()
     daily_fee = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -28,6 +28,7 @@ class Borrowing(models.Model):
     user_id = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="borrowings", on_delete=models.CASCADE)
 
 
+
 class Payment(models.Model):
 
     class Status(models.TextChoices):
@@ -39,7 +40,8 @@ class Payment(models.Model):
         FINE = "FINE"
     status = models.CharField(max_length=255, choices=Status.choices)
     type = models.CharField(max_length=255, choices=Type.choices)
-    borrowing_id = models.ForeignKey(Borrowing, related_name="types", on_delete=models.CASCADE)
+    borrowing_id = models.ForeignKey(Borrowing, related_name="payments", on_delete=models.CASCADE)
     session_url = models.URLField(max_length=200)
+
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     money_to_pay = models.ManyToManyField(Borrowing)
