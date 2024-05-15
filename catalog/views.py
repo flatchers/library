@@ -17,6 +17,27 @@ class BorrowingViewSet(viewsets.ModelViewSet):
     queryset = Borrowing.objects.all()
     serializer_class = BorrowingSerializer
 
+    @staticmethod
+    def _params_to_ints(qs):
+        """Converts a list of string IDs to a list of integers"""
+        return [int(str_id) for str_id in qs.split(",")]
+
+    def get_queryset(self):
+        """Retrieve the movies with filters"""
+        user_id = self.request.query_params.get("user_id")
+        is_active = self.request.query_params.get("is_active")
+
+        queryset = self.queryset
+
+        if user_id:
+            user_id_ids = self._params_to_ints(user_id)
+            queryset = queryset.filter(user_id__id__in=user_id_ids)
+
+        if is_active:
+            queryset = queryset.filter(user_id__is_active=is_active)
+
+        return queryset.distinct()
+
     def get_serializer_class(self):
         if self.action == "list":
             return BorrowingListSerializer
