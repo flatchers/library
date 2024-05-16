@@ -1,4 +1,6 @@
+from django.db import IntegrityError
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from catalog.models import Book, Borrowing, Payment
 from user.serializers import UserSerializer
@@ -24,7 +26,9 @@ class BookWithIdAndNameSerializer(serializers.RelatedField):
 
 class UserWithIdAndNameSerializer(serializers.RelatedField):
     def to_representation(self, value):
-        return "id: %s (%s)" % (value.id, value.username)
+        if value.is_active:
+            return "id: %s (%s) Active" % (value.id, value.username)
+        return "id: %s (%s) Offline" % (value.id, value.username)
 
 
 class UserFullInformationSerializer(serializers.RelatedField):
