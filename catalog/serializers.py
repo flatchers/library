@@ -1,4 +1,6 @@
+from django.db import IntegrityError
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from catalog.models import Book, Borrowing, Payment
 from user.serializers import UserSerializer
