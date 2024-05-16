@@ -46,6 +46,25 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         else:
             return BorrowingSerializer
 
+    def perform_create(self, serializer):
+        book_id = self.request.data.get("book_id")
+        borrowing_ar = self.request.data.get("actual_return")
+
+        if book_id and not borrowing_ar:
+            book = Book.objects.get(pk=book_id)
+            book.inventory -= 1
+            book.save()
+        return serializer.save()
+
+    def perform_update(self, serializer):
+        book_id = self.request.data.get("book_id")
+        borrowing_ar = self.request.data.get("actual_return")
+        if borrowing_ar:
+            book = Book.objects.get(pk=book_id)
+            book.inventory += 1
+            book.save()
+        return serializer.save()
+
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.all()
