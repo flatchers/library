@@ -10,6 +10,7 @@ class Book(models.Model):
     class Cover(models.TextChoices):
         HARD = "HARD"
         SOFT = "SOFT"
+
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
     cover = models.CharField(max_length=255, choices=Cover.choices)
@@ -25,7 +26,9 @@ class Borrowing(models.Model):
     expected_return = models.DateField()
     actual_return = models.DateField(blank=True, null=True)
     book_id = models.ManyToManyField(Book)
-    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="borrowings", on_delete=models.CASCADE)
+    user_id = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="borrowings", on_delete=models.CASCADE
+    )
 
 
 class Payment(models.Model):
@@ -37,9 +40,12 @@ class Payment(models.Model):
     class Type(models.TextChoices):
         PAYMENT = "PAYMENT"
         FINE = "FINE"
+
     status = models.CharField(max_length=255, choices=Status.choices)
     type = models.CharField(max_length=255, choices=Type.choices)
-    borrowing_id = models.ForeignKey(Borrowing, related_name="types", on_delete=models.CASCADE)
+    borrowing_id = models.ForeignKey(
+        Borrowing, related_name="types", on_delete=models.CASCADE
+    )
     session_url = models.URLField(max_length=200)
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     money_to_pay = models.ManyToManyField(Borrowing)
