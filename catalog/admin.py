@@ -6,9 +6,20 @@ from user.models import User
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ["title", "author", "cover", "inventory", "daily_fee", ]
-    list_filter = ["title", "author", ]
-    search_fields = ["title", ]
+    list_display = [
+        "title",
+        "author",
+        "cover",
+        "inventory",
+        "daily_fee",
+    ]
+    list_filter = [
+        "title",
+        "author",
+    ]
+    search_fields = [
+        "title",
+    ]
 
 
 @admin.register(Borrowing)
@@ -18,7 +29,12 @@ class BorrowingAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ["status", "type", "session_url", "session_id", ]
+    list_display = [
+        "status",
+        "type",
+        "session_url",
+        "session_id",
+    ]
 
 
 admin.site.register(User)
