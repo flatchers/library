@@ -51,7 +51,7 @@ class BookTest(TestCase):
         self.assertEqual(res.data, serializer.data)
 
 
-class AdminBookCreate(TestCase):
+class BookCreateAuthorizedTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -59,7 +59,7 @@ class AdminBookCreate(TestCase):
         )
         self.client.force_authenticate(self.user)
 
-    def test_book_create(self):
+    def test_book_create_forbidden(self):
         payload = {
             "title": "new test",
             "author": "Jonathan Adkins",
@@ -68,3 +68,27 @@ class AdminBookCreate(TestCase):
         }
         response = self.client.post(BOOK_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class AdminBookTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            username="georgefranco",
+            password="123465",
+            email="test@admin.user",
+            is_staff=True
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_book_create_for_admin(self):
+        payload = {
+            "title": "new else",
+            "author": "Jonathan Adkins",
+            "cover": "HARD",
+            "inventory": 12,
+            "daily_fee": 12.05
+        }
+
+        res = self.client.post(BOOK_URL, payload)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
