@@ -1,4 +1,5 @@
-from unittest import TestCase
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -48,3 +49,22 @@ class BookTest(TestCase):
         print("RESPONSE: ", detail_url(book.id))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+
+class AdminBookCreate(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            username="jackfranco", password="123465"
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_book_create(self):
+        payload = {
+            "title": "new test",
+            "author": "Jonathan Adkins",
+            "inventory": 12,
+            "daily_fee": 12.05
+        }
+        response = self.client.post(BOOK_URL, payload)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
