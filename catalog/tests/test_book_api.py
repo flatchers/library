@@ -92,3 +92,15 @@ class AdminBookTest(TestCase):
 
         res = self.client.post(BOOK_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(payload["title"], "new else")
+        self.assertEqual(payload["author"], "Jonathan Adkins")
+        self.assertEqual(payload["cover"], "HARD")
+        self.assertEqual(payload["inventory"], 12)
+        self.assertEqual(payload["daily_fee"], 12.05)
+
+    def test_book_delete_available(self):
+        info = sample_book()
+
+        res = self.client.delete(detail_url(info.id))
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
