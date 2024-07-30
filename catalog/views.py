@@ -1,16 +1,23 @@
+from django_q.tasks import async_task
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from .telegram_bot import notify_borrowing_created, notify_borrowing_overdue
 
 from catalog.models import Book, Borrowing, Payment
 from catalog.permissions import IsAdminOrReadOnly
-from catalog.serializers import BookSerializer, BorrowingSerializer, PaymentSerializer, BorrowingListSerializer, \
-    BorrowingDetailSerializer
+from catalog.serializers import (
+    BookSerializer,
+    BorrowingSerializer,
+    PaymentSerializer,
+    BorrowingListSerializer,
+    BorrowingDetailSerializer,
+)
 
 
 class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    permission_classes = (IsAdminOrReadOnly, )
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class BorrowingViewSet(viewsets.ModelViewSet):
@@ -47,23 +54,21 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             return BorrowingSerializer
 
     def perform_create(self, serializer):
-        book_id = self.request.data.get("book_id")
-        borrowing_ar = self.request.data.get("actual_return")
-
-        if book_id and not borrowing_ar:
-            book = Book.objects.get(pk=book_id)
+        borrowing = serializer.save()
+        async_task(notify_borrowing_created, borrowing.id)  # Trigger notification
+        for book in borrowing.book_id.all():
             book.inventory -= 1
             book.save()
-        return serializer.save()
 
     def perform_update(self, serializer):
-        book_id = self.request.data.get("book_id")
-        borrowing_ar = self.request.data.get("actual_return")
-        if borrowing_ar:
-            book = Book.objects.get(pk=book_id)
-            book.inventory += 1
-            book.save()
-        return serializer.save()
+        from datetime import date
+        borrowing = serializer.save()
+        if borrowing.expected_return < date.today():
+            async_task(notify_borrowing_overdue, borrowing.id)
+        if borrowing.actual_return:
+            for book in borrowing.book_id.all():
+                book.inventory += 1
+                book.save()
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
