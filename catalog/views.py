@@ -1,14 +1,23 @@
+import os
+
+from django.db import transaction
+from django.utils import timezone
 from django_q.tasks import async_task
-from rest_framework import viewsets
+from dotenv import load_dotenv
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+
 from .telegram_bot import notify_borrowing_created, notify_borrowing_overdue
 
+
 from catalog.models import Book, Borrowing, Payment
-from catalog.permissions import IsAdminOrReadOnly
+from catalog.permissions import IsAdminOrReadOnly, IsAdminAndAuthenticatedOrReadOnly
 from catalog.serializers import (
     BookSerializer,
     BorrowingSerializer,
-    PaymentSerializer,
     BorrowingListSerializer,
     BorrowingDetailSerializer,
 )
@@ -23,54 +32,26 @@ class BookViewSet(viewsets.ModelViewSet):
 class BorrowingViewSet(viewsets.ModelViewSet):
     queryset = Borrowing.objects.all()
     serializer_class = BorrowingSerializer
-
-    @staticmethod
-    def _params_to_ints(qs):
-        """Converts a list of string IDs to a list of integers"""
-        return [int(str_id) for str_id in qs.split(",")]
-
-    def get_queryset(self):
-        """Retrieve the movies with filters"""
-        user_id = self.request.query_params.get("user_id")
-        is_active = self.request.query_params.get("is_active")
-
-        queryset = self.queryset
-
-        if user_id:
-            user_id_ids = self._params_to_ints(user_id)
-            queryset = queryset.filter(user_id__id__in=user_id_ids)
-
-        if is_active:
-            queryset = queryset.filter(user_id__is_active=is_active)
-
-        return queryset.distinct()
+    permission_classes = (IsAdminAndAuthenticatedOrReadOnly,)
 
     def get_serializer_class(self):
         if self.action == "list":
             return BorrowingListSerializer
         if self.action == "retrieve":
             return BorrowingDetailSerializer
-        else:
-            return BorrowingSerializer
+        return BorrowingSerializer
 
     def perform_create(self, serializer):
         borrowing = serializer.save()
-        async_task(notify_borrowing_created, borrowing.id)  # Trigger notification
-        for book in borrowing.book_id.all():
-            book.inventory -= 1
-            book.save()
+        borrowing.book.inventory -= 1
+        borrowing.book.save()
 
     def perform_update(self, serializer):
         from datetime import date
         borrowing = serializer.save()
-        if borrowing.expected_return < date.today():
+        if borrowing.expected_return_date < date.today():
             async_task(notify_borrowing_overdue, borrowing.id)
-        if borrowing.actual_return:
-            for book in borrowing.book_id.all():
-                book.inventory += 1
-                book.save()
+        if borrowing.actual_return_date:
+            borrowing.book.inventory += 1
+            borrowing.book.save()
 
-
-class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all()
-    serializer_class = PaymentSerializer
