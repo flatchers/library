@@ -9,7 +9,7 @@ from user.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
-        fields = ("id", "username", "email", "password", "is_staff", "is_active")
+        fields = ("id", "email", "first_name", "last_name", "password", "is_staff", "is_active")
         read_only_fields = ("id", "is_staff",)
         extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
 
