@@ -1,9 +1,6 @@
-from django.db import IntegrityError
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
 from catalog.models import Book, Borrowing, Payment
-from user.serializers import UserSerializer
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -19,10 +16,8 @@ class BookWithIdAndNameSerializer(serializers.RelatedField):
 
 class UserWithIdAndNameSerializer(serializers.RelatedField):
     def to_representation(self, value):
-        if not value.is_active:
-            return "id: %s (%s) Offline" % (value.id, value.username)
-        if value.is_active:
-            return "id: %s (%s) Active" % (value.id, value.username)
+        status = "Active" if value.is_active else "Offline"
+        return f"id: {value.id} ({value.username}) {status}"
 
 
 class UserFullInformationSerializer(serializers.RelatedField):
@@ -54,6 +49,15 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "book",
             "user_id"
         )
+
+    def validate(self, attrs):
+        if attrs["book"].inventory <= 0:
+            raise serializers.ValidationError(
+                {
+                    "inventory": "there are no books left in the library"
+                }
+            )
+        return attrs
 
 
 class BorrowingListSerializer(BorrowingSerializer):
