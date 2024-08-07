@@ -30,15 +30,15 @@ def send_telegram_message(message):
 
 def notify_borrowing_created(borrowing_id):
     borrowing = Borrowing.objects.get(id=borrowing_id)
-    books = ', '.join(book.title for book in borrowing.book_id.all())
-    message = (f"New borrowing created by {borrowing.user_id.username} on {borrowing.borrow_date} "
-               f"for books: {books} ID: {borrowing.id}")
+    book_title = borrowing.book.title
+    message = (f"New borrowing created by {borrowing.user_id} on {borrowing.borrow_date} "
+               f"for book: {book_title} ID: {borrowing.id}")
     async_task(send_telegram_message, message)
 
 
 def notify_borrowing_overdue(borrowing_id):
     borrowing = Borrowing.objects.get(id=borrowing_id)
-    message = (f"Borrowing overdue: id: {borrowing.id}, username: {borrowing.user_id.username}, "
+    message = (f"Borrowing overdue: id: {borrowing.id}, username: {borrowing.user_id.email}, "
                f"expected return {borrowing.expected_return}")
     async_task(send_telegram_message, message)
 
