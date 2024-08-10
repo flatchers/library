@@ -1,20 +1,17 @@
 import os
 
-from django.db import transaction
-from django.utils import timezone
 from django_q.tasks import async_task
+
 from dotenv import load_dotenv
-from rest_framework import viewsets, status
-from rest_framework.decorators import action, api_view
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets
 
 from .telegram_bot import notify_borrowing_created, notify_borrowing_overdue
 
 
-from catalog.models import Book, Borrowing, Payment
-from catalog.permissions import IsAdminOrReadOnly, IsAdminAndAuthenticatedOrReadOnly
+from catalog.models import Book, Borrowing
+from catalog.permissions import IsAdminOrReadOnly
 from catalog.serializers import (
     BookSerializer,
     BorrowingSerializer,
@@ -32,7 +29,11 @@ class BookViewSet(viewsets.ModelViewSet):
 class BorrowingViewSet(viewsets.ModelViewSet):
     queryset = Borrowing.objects.select_related("book", "user_id").all()
     serializer_class = BorrowingSerializer
-    permission_classes = (IsAdminAndAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticated,)
+
+    @staticmethod
+    def _params_to_ints(query_string):
+        return [int(str_id) for str_id in query_string.split(",")]
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -41,17 +42,25 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             return BorrowingDetailSerializer
         return BorrowingSerializer
 
+    def get_queryset(self):
+        queryset = self.queryset
+        book = self.request.query_params.get("book")
+        if book:
+            book = self._params_to_ints(book)
+            queryset = queryset.filter(book__id__in=book, user_id__is_active=True)
+
+        return queryset.distinct()
+
     def perform_create(self, serializer):
         borrowing = serializer.save()
-        borrowing.book.inventory -= 1
-        borrowing.book.save()
+        if not borrowing.actual_return:
+            borrowing.book.inventory -= 1
+            borrowing.book.save()
+            async_task(notify_borrowing_created, borrowing.id)
 
     def perform_update(self, serializer):
-        from datetime import date
         borrowing = serializer.save()
-        if borrowing.expected_return_date < date.today():
-            async_task(notify_borrowing_overdue, borrowing.id)
-        if borrowing.actual_return_date:
+        if borrowing.actual_return:
             borrowing.book.inventory += 1
             borrowing.book.save()
-
+            async_task(notify_borrowing_overdue, borrowing.id)
