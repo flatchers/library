@@ -1,7 +1,6 @@
 import uuid
 
-from django.contrib.auth.models import User
-from django.db import models, IntegrityError
+from django.db import models
 
 from library import settings
 
@@ -25,10 +24,16 @@ class Borrowing(models.Model):
     borrow_date = models.DateField(auto_now=True)
     expected_return = models.DateField()
     actual_return = models.DateField(blank=True, null=True)
-    book = models.ForeignKey(Book, related_name="borrowings", null=True, on_delete=models.CASCADE)
+    book = models.ForeignKey(Book, related_name="borrowings", on_delete=models.CASCADE)
     user_id = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="borrowings", on_delete=models.CASCADE
     )
+
+    def save(
+        self, force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        self.full_clean()
+        return super(Borrowing, self).save(force_insert, force_update, using, update_fields)
 
 
 

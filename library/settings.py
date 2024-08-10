@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django_q",
     "rest_framework",
     "rest_framework_simplejwt",
+    "debug_toolbar",
     "catalog",
     "user",
 ]
@@ -55,6 +56,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware"
 ]
 
 ROOT_URLCONF = "library.urls"
@@ -73,6 +75,10 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+INTERNAL_IPS = [
+    "127.0.0.1"
 ]
 
 WSGI_APPLICATION = "library.wsgi.application"

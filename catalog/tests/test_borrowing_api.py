@@ -63,4 +63,3 @@ class AuthenticatedBorrowingApiTest(TestCase):
         serializer = BorrowingDetailSerializer(borrowing)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
-
