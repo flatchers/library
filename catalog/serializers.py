@@ -17,12 +17,12 @@ class BookWithIdAndNameSerializer(serializers.RelatedField):
 class UserWithIdAndNameSerializer(serializers.RelatedField):
     def to_representation(self, value):
         status = "Active" if value.is_active else "Offline"
-        return f"id: {value.id} ({value.username}) {status}"
+        return f"id: {value.id} ({value.email}) {status}"
 
 
 class UserFullInformationSerializer(serializers.RelatedField):
     def to_representation(self, value):
-        return "%s, %s" % (value.username, value.email)
+        return "%s" % (value.email)
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -51,10 +51,16 @@ class BorrowingSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, attrs):
-        if attrs["book"].inventory <= 0:
+        if attrs["book"].inventory < 0:
             raise serializers.ValidationError(
                 {
                     "inventory": "there are no books left in the library"
+                }
+            )
+        if self.instance and self.instance.actual_return:
+            raise serializers.ValidationError(
+                {
+                    "actual_return": "Borrowing is closed"
                 }
             )
         return attrs
