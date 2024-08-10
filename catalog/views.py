@@ -1,8 +1,4 @@
-import os
-
 from django_q.tasks import async_task
-
-from dotenv import load_dotenv
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
