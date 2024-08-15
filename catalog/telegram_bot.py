@@ -1,16 +1,18 @@
 import os
+
 import django
 import requests
 from dotenv import load_dotenv
+
+from django_q.tasks import async_task
+
+from catalog.models import Borrowing
+
 
 load_dotenv()
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'library.settings')
 django.setup()
-
-from django_q.tasks import async_task
-from catalog.models import Borrowing
-
 
 TELEGRAM_BOT_TOKEN = os.getenv("TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
@@ -31,14 +33,16 @@ def send_telegram_message(message):
 def notify_borrowing_created(borrowing_id):
     borrowing = Borrowing.objects.get(id=borrowing_id)
     book_title = borrowing.book.title
-    message = (f"New borrowing created by {borrowing.user_id} on {borrowing.borrow_date} "
+    message = (f"New borrowing created by {borrowing.user_id} "
+               f"on {borrowing.borrow_date} "
                f"for book: {book_title} ID: {borrowing.id}")
     async_task(send_telegram_message, message)
 
 
 def notify_borrowing_overdue(borrowing_id):
     borrowing = Borrowing.objects.get(id=borrowing_id)
-    message = (f"Borrowing overdue: id: {borrowing.id}, email: {borrowing.user_id.email}, "
+    message = (f"Borrowing overdue: id: {borrowing.id}, "
+               f"email: {borrowing.user_id.email}, "
                f"expected return {borrowing.expected_return}")
     async_task(send_telegram_message, message)
 

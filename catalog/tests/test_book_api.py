@@ -55,7 +55,7 @@ class BookCreateAuthorizedTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            username="jackfranco", password="123465"
+            email="jackfranco@user.user", password="123465"
         )
         self.client.force_authenticate(self.user)
 
@@ -74,7 +74,6 @@ class AdminBookTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            username="georgefranco",
             password="123465",
             email="test@admin.user",
             is_staff=True
