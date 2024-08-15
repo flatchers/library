@@ -39,11 +39,18 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return BorrowingSerializer
 
     def get_queryset(self):
-        queryset = self.queryset
+        user = self.request.user
+        if user.is_staff:
+            queryset = self.queryset
+        else:
+            queryset = self.queryset.filter(user_id=self.request.user)
         book = self.request.query_params.get("book")
         if book:
             book = self._params_to_ints(book)
-            queryset = queryset.filter(book__id__in=book, user_id__is_active=True)
+            queryset = queryset.filter(
+                book__id__in=book,
+                user_id__is_active=True
+            )
 
         return queryset.distinct()
 
@@ -60,3 +67,6 @@ class BorrowingViewSet(viewsets.ModelViewSet):
             borrowing.book.inventory += 1
             borrowing.book.save()
             async_task(notify_borrowing_overdue, borrowing.id)
+
+    def get_object(self):
+        return self.request.user
