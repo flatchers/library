@@ -150,6 +150,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# commits
+-and-users-service
+
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -200,6 +203,13 @@ cython_debug/
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
+
+# ngrok
+.ngrok.exe.old
+ngrok.exe
+
+# django-q
+q
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
