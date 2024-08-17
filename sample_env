@@ -8,3 +8,4 @@ CHAT_ID=your_chat_id_here
 NGROK_TUNNEL_URL=https://your_ngrok_tunnel_url_here
 STRIPE_SECRET_KEY=your_stripe_secret_key_here
 PGDATA = your_pgdata
+SECRET_KEY = SECRET_KEY
