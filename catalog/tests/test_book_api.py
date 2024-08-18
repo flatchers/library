@@ -17,7 +17,7 @@ def sample_book(**params):
         "title": "The Great Gatsby",
         "author": "Francis Scott Key Fitzgerald",
         "inventory": 10,
-        "daily_fee": 10.05
+        "daily_fee": 10.05,
     }
     defaults.update(params)
     return Book.objects.create(**defaults)
@@ -64,7 +64,7 @@ class BookCreateAuthorizedTest(TestCase):
             "title": "new test",
             "author": "Jonathan Adkins",
             "inventory": 12,
-            "daily_fee": 12.05
+            "daily_fee": 12.05,
         }
         response = self.client.post(BOOK_URL, payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -74,9 +74,7 @@ class AdminBookTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            password="123465",
-            email="test@admin.user",
-            is_staff=True
+            password="123465", email="test@admin.user", is_staff=True
         )
         self.client.force_authenticate(self.user)
 
@@ -86,7 +84,7 @@ class AdminBookTest(TestCase):
             "author": "Jonathan Adkins",
             "cover": "HARD",
             "inventory": 12,
-            "daily_fee": 12.05
+            "daily_fee": 12.05,
         }
 
         res = self.client.post(BOOK_URL, payload)

@@ -6,10 +6,7 @@ from rest_framework.reverse import reverse
 from rest_framework.test import APIClient
 
 from catalog.models import Borrowing, Book
-from catalog.serializers import (
-    BorrowingListSerializer,
-    BorrowingDetailSerializer
-)
+from catalog.serializers import BorrowingListSerializer, BorrowingDetailSerializer
 
 
 BORROWING_URL = reverse("library:borrowing-list")
@@ -33,15 +30,11 @@ class AuthenticatedBorrowingApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="tester_user@test.user",
-            password="123465"
+            email="tester_user@test.user", password="123465"
         )
         self.client.force_authenticate(self.user)
         self.book = Book.objects.create(
-            title="test",
-            author="test testerson",
-            inventory=10,
-            daily_fee=10.05
+            title="test", author="test testerson", inventory=10, daily_fee=10.05
         )
 
     def test_borrowing_list(self):
@@ -55,9 +48,7 @@ class AuthenticatedBorrowingApiTest(TestCase):
 
     def test_borrowing_detail(self):
         borrowing = Borrowing.objects.create(
-            expected_return="2024-07-12",
-            book=self.book,
-            user_id=self.user
+            expected_return="2024-07-12", book=self.book, user_id=self.user
         )
         url = borrowing_url(borrowing.id)
         res = self.client.get(url)

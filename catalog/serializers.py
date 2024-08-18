@@ -47,22 +47,16 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "expected_return",
             "actual_return",
             "book",
-            "user_id"
+            "user_id",
         )
 
     def validate(self, attrs):
         if attrs["book"].inventory < 0:
             raise serializers.ValidationError(
-                {
-                    "inventory": "there are no books left in the library"
-                }
+                {"inventory": "there are no books left in the library"}
             )
         if self.instance and self.instance.actual_return:
-            raise serializers.ValidationError(
-                {
-                    "actual_return": "Borrowing is closed"
-                }
-            )
+            raise serializers.ValidationError({"actual_return": "Borrowing is closed"})
         return attrs
 
 
@@ -96,5 +90,5 @@ class BorrowingDetailSerializer(BorrowingSerializer):
             "actual_return",
             "book",
             "user_id",
-            "payments"
+            "payments",
         )

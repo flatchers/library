@@ -47,10 +47,7 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         book = self.request.query_params.get("book")
         if book:
             book = self._params_to_ints(book)
-            queryset = queryset.filter(
-                book__id__in=book,
-                user_id__is_active=True
-            )
+            queryset = queryset.filter(book__id__in=book, user_id__is_active=True)
 
         return queryset.distinct()
 
