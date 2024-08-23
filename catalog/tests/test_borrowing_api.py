@@ -48,7 +48,7 @@ class AuthenticatedBorrowingApiTest(TestCase):
 
     def test_borrowing_detail(self):
         borrowing = Borrowing.objects.create(
-            expected_return="2024-07-12", book=self.book, user_id=self.user
+            expected_return="2024-07-12", book=self.book, user=self.user
         )
         url = borrowing_url(borrowing.id)
         res = self.client.get(url)

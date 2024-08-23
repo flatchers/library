@@ -25,7 +25,7 @@ class Borrowing(models.Model):
     expected_return = models.DateField()
     actual_return = models.DateField(blank=True, null=True)
     book = models.ForeignKey(Book, related_name="borrowings", on_delete=models.CASCADE)
-    user_id = models.ForeignKey(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL, related_name="borrowings", on_delete=models.CASCADE
     )
 
@@ -49,7 +49,7 @@ class Payment(models.Model):
         FINE = "FINE"
 
     status = models.CharField(max_length=255, choices=Status.choices)
-    type = models.CharField(max_length=255, choices=Type.choices)
+    types = models.CharField(max_length=255, choices=Type.choices)
     borrowing_id = models.ForeignKey(
         Borrowing, related_name="payments", on_delete=models.CASCADE
     )

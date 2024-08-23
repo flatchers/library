@@ -31,7 +31,7 @@ class BorrowingAdmin(admin.ModelAdmin):
 class PaymentAdmin(admin.ModelAdmin):
     list_display = [
         "status",
-        "type",
+        "types",
         "session_url",
         "session_id",
     ]

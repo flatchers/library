@@ -20,9 +20,9 @@ class UserWithIdAndNameSerializer(serializers.RelatedField):
         return f"id: {value.id} ({value.email}) {status}"
 
 
-class UserFullInformationSerializer(serializers.RelatedField):
-    def to_representation(self, value):
-        return "%s" % (value.email)
+# class UserFullInformationSerializer(serializers.RelatedField):
+#     def to_representation(self, value):
+#         return "%s" % (value.email)
 
 
 class PaymentSerializer(serializers.ModelSerializer):
@@ -38,7 +38,6 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Borrowing
         fields = (
@@ -47,22 +46,13 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "expected_return",
             "actual_return",
             "book",
-            "user_id",
+            "user",
         )
-
-    def validate(self, attrs):
-        if attrs["book"].inventory < 0:
-            raise serializers.ValidationError(
-                {"inventory": "there are no books left in the library"}
-            )
-        if self.instance and self.instance.actual_return:
-            raise serializers.ValidationError({"actual_return": "Borrowing is closed"})
-        return attrs
 
 
 class BorrowingListSerializer(BorrowingSerializer):
     book = BookWithIdAndNameSerializer(read_only=True)
-    user_id = UserWithIdAndNameSerializer(read_only=True)
+    user = UserWithIdAndNameSerializer(read_only=True)
 
     class Meta:
         model = Borrowing
@@ -72,14 +62,14 @@ class BorrowingListSerializer(BorrowingSerializer):
             "expected_return",
             "actual_return",
             "book",
-            "user_id",
+            "user",
         )
 
 
 class BorrowingDetailSerializer(BorrowingSerializer):
     book = BookSerializer()
-    user_id = UserFullInformationSerializer(read_only=True)
-    payments = PaymentSerializer(many=True, read_only=True)
+    user = UserWithIdAndNameSerializer(read_only=True)
+    payments = PaymentSerializer(read_only=True, many=True)
 
     class Meta:
         model = Borrowing
@@ -89,6 +79,6 @@ class BorrowingDetailSerializer(BorrowingSerializer):
             "expected_return",
             "actual_return",
             "book",
-            "user_id",
+            "user",
             "payments",
         )
